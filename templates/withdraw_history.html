@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Withdraw History{% endblock %}
+
+{% block content %}
+
+<h2 style="margin-bottom:15px;">📜 Withdraw History</h2>
+
+<div class="table-container">
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>UPI</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for w in data %}
+            <tr>
+                <td>#{{ w.id }}</td>
+
+                <td style="color:#22c55e;">₹{{ w.amount }}</td>
+
+                <td>{{ w.upi_id }}</td>
+
+                <td>
+                    {% if w.status == 'approved' %}
+                        <span class="status success">Approved</span>
+                    {% elif w.status == 'pending' %}
+                        <span class="status pending">Pending</span>
+                    {% else %}
+                        <span class="status cancel">Rejected</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ w.created_at|date:"d M Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align:center;">
+                    No Withdraw Requests Yet
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<style>
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #020617;
+    border-radius: 10px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: #1f2937;
+}
+
+tr {
+    border-bottom: 1px solid #333;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: white;
+}
+
+/* 🔥 COLORS */
+.success {
+    background: #16a34a;
+}
+
+.pending {
+    background: #f59e0b;
+}
+
+.cancel {
+    background: #ef4444;
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}My Wallet{% endblock %}
+
+{% block content %}
+
+<div class="wallet-container">
+
+    <!-- 🔥 BALANCE CARD -->
+    <div class="balance-card">
+        <h2>💰 Wallet Balance</h2>
+        <h1>₹{{ request.user.profile.balance }}</h1>
+
+        <div class="actions">
+            <a href="{% url 'add_balance' %}" class="btn add">➕ Add Money</a>
+            <a href="{% url 'withdraw' %}" class="btn withdraw">💸 Withdraw</a>
+            <a href="{% url 'withdraw_history' %}" class="btn history">📜 Withdraw History</a>
+        </div>
+    </div>
+
+    <!-- 🔥 STATS -->
+    <div class="stats">
+        <div class="card">
+            <p>Total Deposit</p>
+            <h3>₹{{ total_deposit }}</h3>
+        </div>
+
+        <div class="card">
+            <p>Total Spent</p>
+            <h3>₹{{ total_spent }}</h3>
+        </div>
+    </div>
+
+    <!-- 🔥 TRANSACTIONS -->
+    <div class="transactions">
+        <h3>📊 Transaction History</h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for t in transations %}
+                <tr>
+                    <td>₹{{ t.amount }}</td>
+
+                    <td>
+                        {% if t.status == 'success' %}
+                            <span class="status success">Success</span>
+                        {% elif t.status == 'failed' %}
+                            <span class="status failed">Failed</span>
+                        {% elif t.status == 'referral' %}
+                            <span class="status referral">Referral</span>
+                        {% else %}
+                            <span class="status pending">Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ t.created_at|date:"d M Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No Transactions Yet</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- 🔥 STYLE -->
+<style>
+
+.wallet-container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* 🔥 BALANCE CARD */
+.balance-card {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.balance-card h1 {
+    font-size: 40px;
+    margin: 10px 0;
+    color: #22c55e;
+}
+
+.actions {
+    margin-top: 15px;
+}
+
+.btn {
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin: 5px;
+    display: inline-block;
+    font-weight: bold;
+    color: white;
+}
+
+.add {
+    background: #22c55e;
+}
+
+.withdraw {
+    background: #ef4444;
+}
+
+.history {
+    background: #3b82f6;
+}
+
+/* 🔥 STATS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* 🔥 TABLE */
+.transactions table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions th,
+.transactions td {
+    padding: 12px;
+    text-align: center;
+}
+
+.transactions th {
+    background: #1f2937;
+}
+
+.transactions tr {
+    border-bottom: 1px solid #333;
+}
+
+/* 🔥 STATUS COLORS */
+.status {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.success { background: #16a34a; }
+.failed { background: #ef4444; }
+.pending { background: #f59e0b; }
+.referral { background: #3b82f6; }
+
+</style>
+
+{% endblock %}

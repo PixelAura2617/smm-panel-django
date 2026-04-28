@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="glass p-6 rounded-xl text-center">
+
+    <h1 class="text-2xl font-bold text-green-400 mb-3">
+        Order Placed Successfully ✅
+    </h1>
+
+    <p>Profit: ₹{{ profit }}</p>
+    <p>Remaining Balance: ₹{{ balance }}</p>
+
+    <a href="/dashboard/"
+       class="inline-block mt-4 px-5 py-2 bg-blue-600 rounded hover:bg-blue-700">
+       Go Dashboard
+    </a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Add Balance{% endblock %}
+
+{% block content %}
+
+<div class="balance-container">
+
+    <div class="card balance-card">
+
+        <h2>Add Balance 💰</h2>
+
+        <!-- 🔴 ERROR -->
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <!-- 🔥 FORM -->
+        <form method="POST" action="{% url 'create_pay' %}">
+            {% csrf_token %}
+
+            <label>Enter Amount</label>
+            <input 
+                type="number" 
+                name="amount" 
+                placeholder="Enter amount (₹)" 
+                min="1"
+                required
+            >
+
+            <button type="submit">Add Balance</button>
+        </form>
+
+    </div>
+
+</div>
+
+<style>
+
+.balance-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.balance-card {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.balance-card h2 {
+    margin-bottom: 15px;
+}
+
+/* 🔴 ERROR BOX */
+.error {
+    background: #ef4444;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* INPUT FIX */
+input {
+    font-size: 16px;
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% block title %}Order Service{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+
+    <div style="
+        background: linear-gradient(145deg, #0f172a, #1e293b);
+        padding: 40px;
+        border-radius: 20px;
+        width: 400px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        text-align: center;
+    ">
+
+        <h2 style="color:white; margin-bottom: 25px;">
+            🚀 Order Service
+        </h2>
+
+        <p style="color:#9ca3af; margin-bottom:20px;">
+            {{ service.name }}
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- LINK -->
+            <input 
+                type="text" 
+                name="link" 
+                value="{{ request.POST.link }}"
+                placeholder="Enter link"
+                required
+                style="
+                    width: 100%;
+                    padding: 12px;
+                    border-radius: 10px;
+                    border: none;
+                    margin-bottom: 15px;
+                    background: #0f172a;
+                    color: white;
+                "
+            >
+
+            <!-- QUANTITY -->
+            <input 
+                type="number" 
+                name="quantity" 
+                min="{{ service.min_qty }}"
+                max="{{ service.max_qty }}"
+                value="{{ request.POST.quantity }}"
+                placeholder="Enter quantity"
+                required
+                style="
+                    width: 100%;
+                    padding: 12px;
+                    border-radius: 10px;
+                    border: none;
+                    margin-bottom: 15px;
+                    background: #0f172a;
+                    color: white;
+                "
+            >
+
+            <!-- PRICE -->
+            <p style="color:#9ca3af; margin-bottom:10px;">
+                Price per 1000: ₹{{ service.price }}
+            </p>
+
+            <p style="color: #9ca3af; margin-bottom:10px;">
+                Min: {{ service.min_qty }} | Max: {{ service.max_qty }}
+            </p>
+
+            <!-- TOTAL -->
+            <p id="totalPrice" style="color:#22c55e; margin-bottom:15px;">
+                Total: ₹0
+            </p>
+
+            <p id="balanceBox" style="color:#9ca3af;">
+    Balance: ₹{{ request.user.profile.balance }}
+</p>
+
+<p id="balanceWarning" style="color:#f87171; display:none;">
+    Insufficient balance! Please add funds to place the order.
+</p>
+
+            {% if error %}
+                <p style="color:#f87171; margin-bottom:15px;">
+                    {{ error }}
+                </p>
+            {% endif %}
+
+            <button id="orderBtn" type="submit" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: none;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
+                background: linear-gradient(90deg, #22c55e, #16a34a);
+                cursor: pointer;
+            ">
+                ⚡ Place Order
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ✅ FIXED JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const qtyInput = document.querySelector('input[name="quantity"]');
+    const totalBox = document.getElementById("totalPrice");
+    const balance = parseFloat("{{ request.user.profile.balance }}");
+
+    const btn = document.getElementById("orderBtn");
+    const warning = document.getElementById("balanceWarning");
+
+    const pricePer1000 = parseFloat("{{ service.price|default:0 }}");
+
+    function updateTotal() {
+        const qty = parseInt(qtyInput.value) || 0;
+        const total = (pricePer1000 / 1000) * qty;
+
+        totalBox.innerText = "Total: ₹" + total.toFixed(2);
+
+        // 🔥 balance check
+        if (total > balance) {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            warning.style.display = "block";
+        } else {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            warning.style.display = "none";
+        }
+    }
+
+    qtyInput.addEventListener("input", updateTotal);
+    updateTotal();
+
+});
+</script>
+
+{% endblock %}

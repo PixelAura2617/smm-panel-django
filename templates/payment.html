@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Razorpay -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+<div class="bg-gray-800 p-8 rounded-2xl w-96 shadow-xl text-center">
+
+    <h2 class="text-2xl font-bold mb-4">💳 Complete Payment</h2>
+
+    <p class="text-gray-400 mb-6">Secure payment powered by Razorpay</p>
+
+    <div class="bg-gray-700 p-4 rounded-lg mb-6">
+        <p class="text-sm text-gray-300">Amount</p>
+        <h3 class="text-3xl font-bold text-green-400">₹{{ amount }}</h3>
+    </div>
+
+    <button id="payBtn"
+        class="w-full bg-green-500 hover:bg-green-600 py-3 rounded-lg font-semibold transition">
+        Pay Now
+    </button>
+
+</div>
+
+<script>
+document.getElementById('payBtn').onclick = function(){
+
+    var options = {
+        "key": "{{ key }}",
+        "amount": "{{ payment.amount }}",
+        "currency": "INR",
+        "name": "SMM Panel",
+        "description": "Add Balance",
+
+        "order_id": "{{ payment.id }}",
+
+        "handler": function (response){
+
+            // 🔥 form create for backend verification
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = "/payment-success/";
+
+            form.innerHTML = `
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="hidden" name="razorpay_order_id" value="${response.razorpay_order_id}">
+                <input type="hidden" name="razorpay_payment_id" value="${response.razorpay_payment_id}">
+                <input type="hidden" name="razorpay_signature" value="${response.razorpay_signature}">
+                <input type="hidden" name="amount" value="{{ amount }}">
+            `;
+
+            document.body.appendChild(form);
+            form.submit();
+        },
+
+        "theme": {
+            "color": "#22c55e"
+        }
+    };
+
+    var rzp = new Razorpay(options);
+    rzp.open();
+};
+</script>
+
+</body>
+</html>

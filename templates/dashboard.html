@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- 🔥 TOP STATS -->
+<div class="stats">
+    <div class="card stat-card">
+        <h4>Balance</h4>
+        <h2>₹{{ balance }}</h2>
+    </div>
+
+    <div class="card start-card">
+        <h4>Orders</h4>
+        <h2>{{ total_orders }}</h2>
+    </div>
+
+    <div class="card stat-card">
+        <h4>spent</h4>
+        <h2>₹{{ total_spent }}</h2>
+    </div>
+</div>
+
+<!-- 🔥 STICKY SEARCH + CATEGORY -->
+<div class="sticky-bar">
+
+    <form method="GET" class="search-form">
+        <input type="text" id="searchinput" placeholder="Search services...">       
+
+        <select name="category">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat }}"
+                    {% if request.GET.category == cat %}selected{% endif %}>
+                    {{ cat }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- 🔥 CATEGORY TABS -->
+    <div class="tabs">
+
+        <a href="?"
+           class="tab {% if not request.GET.category %}active{% endif %}">
+           All
+        </a>
+
+        {% for cat in categories %}
+            <a href="?category={{ cat }}"
+               class="tab {% if request.GET.category == cat %}active{% endif %}">
+               {{ cat }}
+            </a>
+        {% endfor %}
+
+    </div>
+    <div class="card">
+        <h3> Your Referral Code</h3>
+        <p style="color:#22c55e; font-size:20px;">
+            {{ request.user.profile.referral_code }}
+
+        </p>
+        Share Link:
+        <input type="text"value="http://127.0.1:8000/register?ref={{ request.user.profile.referral_code }}" readonly>
+    </div>
+    {% if request.user.profile.is_reseller %}
+<p style="color:#22c55e;">👑 You are a Reseller</p>
+{% endif %}
+
+</div>
+
+<!-- 🔥 SERVICES -->
+<div class="services">
+
+    {% for service in services %}
+    <div class="card service-card">
+
+        <h3>{{ service.name }}</h3>
+
+        <p class="category">📂 {{ service.category }}</p>
+
+        <p class="price">₹{{ service.price }}</p>
+
+        <form method="POST" action="{% url 'order_service' service.id %}">
+            {% csrf_token %}
+
+            <input type="text" name="link" placeholder="Enter link..." required>
+            <input type="number" name="quantity" placeholder="Quantity" required>
+
+            <button type="submit">Order</button>
+        </form>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<style>
+
+/* 🔥 STATS */
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    flex: 1;
+}
+
+/* 🔥 STICKY BAR */
+.sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #0f172a;
+    padding: 15px;
+    border-bottom: 1px solid #1e293b;
+}
+
+/* 🔍 SEARCH */
+.search-form {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* 🔥 TABS */
+.tabs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 8px 14px;
+    background: #1e293b;
+    border-radius: 20px;
+    text-decoration: none;
+    color: white;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+.tab:hover {
+    background: #334155;
+}
+
+.tab.active {
+    background: linear-gradient(45deg, #22c55e, #06b6d4);
+}
+
+/* 🔥 SERVICES */
+.services {
+    margin-top: 20px;
+}
+
+/* 🔥 CARD */
+.service-card {
+    margin-bottom: 20px;
+    transition: 0.3s;
+}
+
+.service-card:hover {
+    transform: translateY(-3px);
+}
+
+/* 🔥 TEXT */
+.category {
+    color: #94a3b8;
+    margin: 5px 0;
+}
+
+.price {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+</style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const searchInput = document.getElementById("searchInput");
+    const cards = document.querySelectorAll(".service-card");
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener("keyup", function() {
+        const value = this.value.toLowerCase();
+
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+
+            if (text.includes(value)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+
+});
+</script>
+
+{% endblock %}

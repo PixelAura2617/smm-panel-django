@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+
+<h2 style="margin-bottom:15px;">📄 Order History</h2>
+
+<div class="table-container">
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Service</th>
+                <th>Link</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+
+                <td>{{ order.service.name }}</td>
+
+                <td>
+                    <a href="{{ order.link }}" target="_blank">View</a>
+                </td>
+
+                <td>{{ order.quantity }}</td>
+                <td>₹{{ order.price }}</td>
+
+                <!-- 🔥 IMPORTANT ID FOR LIVE UPDATE -->
+                <td id="status-{{ order.id }}">
+                    {% if order.status == 'completed' %}
+                        <span class="status success">Completed</span>
+                    {% elif order.status == 'pending' %}
+                        <span class="status pending">Pending</span>
+                    {% else %}
+                        <span class="status cancel">Canceled</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ order.created_at|date:"d M Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align:center;">No Orders Yet</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+<!-- 🔥 LIVE STATUS AUTO UPDATE -->
+<script>
+setInterval(() => {
+
+    document.querySelectorAll("[id^='status-']").forEach(el => {
+
+        const orderId = el.id.split("-")[1];
+
+        fetch(`/order-status/${orderId}/`)
+            .then(res => res.json())
+            .then(data => {
+
+                let html = "";
+
+                if (data.status === "completed") {
+                    html = '<span class="status success">Completed</span>';
+                } 
+                else if (data.status === "pending") {
+                    html = '<span class="status pending">Pending</span>';
+                } 
+                else {
+                    html = '<span class="status cancel">Canceled</span>';
+                }
+
+                el.innerHTML = html;
+
+            });
+
+    });
+
+}, 5000); // 🔄 every 5 sec
+</script>
+
+<style>
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #020617;
+    border-radius: 10px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: #1f2937;
+}
+
+tr {
+    border-bottom: 1px solid #333;
+}
+
+.status {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: white;
+}
+
+.success {
+    background: #16a34a;
+}
+
+.pending {
+    background: #f59e0b;
+}
+
+.cancel {
+    background: #ef4444;
+}
+
+a {
+    color: #38bdf8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+</style>
+
+{% endblock %}
