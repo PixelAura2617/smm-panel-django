@@ -19,6 +19,8 @@ from django.urls import path
 from core import views
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
+from django.contrib.auth import views as  auth_views
+from django.urls import path
 
 urlpatterns = [
     path('', views.dashboard, name='home'),
@@ -39,5 +41,19 @@ urlpatterns = [
     path('order-status/<int:order_id>/', views.get_order_status, name='order_status'),
     path('withdraw/',views.withdraw, name='withdraw'),
     path('withdraw-history/',views.withdraw_history, name='withdraw_history'),
+    path('forgot-password/', auth_views.PasswordResetView.as_view(
+        template_name='registration/forgot_password.html'
+    ), name='password_reset'),
 
+    path('forgot-password/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='registration/password_reset_done.html'
+    ), name='password_reset_done'),
+
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='registration/password_reset_confirm.html'
+    ), name='password_reset_confirm'),
+
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='registration/password_reset_complete.html'
+    ), name='password_reset_complete'),
 ]
