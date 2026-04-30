@@ -1,0 +1,1 @@
+web: gunicorn smm_panel.wsgi
