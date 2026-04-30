@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-^q-%&=9%oqmf9svuom29+@kjsd5nlb3waqtd8b0$wrpgd0#ab@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['smm-panel-dajngo.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
