@@ -9,11 +9,16 @@ from django.contrib import messages
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models.functions import TruncDate
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
+from .models import EmailOTP
+from django.contrib.auth import login
 
 from .models import Service, Order, Profile, Transaction, WithdrawRequest
 
 import razorpay
 import requests
+import random
 
 
 # 🔐 CONFIG
@@ -466,3 +471,191 @@ def withdraw_history(request):
     data = WithdrawRequest.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'withdraw_history.html', {'data': data})
 
+# 🔹 GENERATE OTP
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+# 🔹 REGISTER (EMAIL OTP SYSTEM)
+# 🔹 GENERATE OTP
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+# 🔹 REGISTER (EMAIL OTP SYSTEM)
+def register(request):
+    if request.method == "POST":
+
+        # =======================
+        # 🔥 STEP 2: VERIFY OTP
+        # =======================
+        if "verify_otp" in request.POST:
+            email = request.POST.get("email")
+            otp = request.POST.get("email_otp")
+            username = request.POST.get("username")
+            password = request.POST.get("password")
+
+            otp_obj = EmailOTP.objects.filter(email=email).order_by('-created_at').first()
+
+            # ❌ OTP not found
+            if not otp_obj:
+                return render(request, "registration/register.html", {
+                    "error": "OTP not found ❌",
+                    "otp_sent": True,
+                    "email": email,
+                    "username": username,
+                    "password": password
+                })
+
+            # ⏰ OTP expired (5 min)
+            if now() > otp_obj.created_at + timedelta(minutes=5):
+                return render(request, "registration/register.html", {
+                    "error": "OTP expired ❌",
+                    "otp_sent": True,
+                    "email": email,
+                    "username": username,
+                    "password": password
+                })
+
+            # ✅ OTP match
+            if otp_obj.otp == otp:
+                EmailOTP.objects.filter(email=email).delete()
+
+                user = User.objects.create_user(
+                    username=username,
+                    password=password,
+                    email=email
+                )
+
+                return redirect("login")
+
+            # ❌ wrong OTP
+            return render(request, "registration/register.html", {
+                "error": "Invalid OTP ❌",
+                "otp_sent": True,
+                "email": email,
+                "username": username,
+                "password": password
+            })
+
+
+        # =======================
+        # 🔥 STEP 1: SEND OTP
+        # =======================
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        email = request.POST.get("email")
+
+        if not username or not password or not email:
+            return render(request, "registration/register.html", {
+                "error": "All fields required ❌"
+            })
+
+        if User.objects.filter(username=username).exists():
+            return render(request, "registration/register.html", {
+                "error": "Username exists ❌"
+            })
+
+        # 🔥 delete old OTP
+        EmailOTP.objects.filter(email=email).delete()
+
+        otp = generate_otp()
+
+        temp_user, _ = User.objects.get_or_create(username=email)
+
+        EmailOTP.objects.create(
+            user=temp_user,
+            email=email,
+            otp=otp
+        )
+
+        # 📧 SEND EMAIL
+        send_mail(
+            "Your OTP Code",
+            f"Your OTP is {otp}",
+            "supportpixelaura@gmail.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return render(request, "registration/register.html", {
+            "otp_sent": True,
+            "email": email,
+            "username": username,
+            "password": password
+        })
+
+    return render(request, "registration/register.html")
+
+
+# 🔹 RESEND OTP
+def resend_otp(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        if not email:
+            return redirect("register")
+
+        # 🔥 delete old OTP
+        EmailOTP.objects.filter(email=email).delete()
+
+        otp = generate_otp()
+
+        temp_user, _ = User.objects.get_or_create(username=email)
+
+        EmailOTP.objects.create(
+            user=temp_user,
+            email=email,
+            otp=otp
+        )
+
+        send_mail(
+            "Resend OTP",
+            f"Your new OTP is {otp}",
+            "supportpixelaura@gmail.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return render(request, "registration/register.html", {
+            "otp_sent": True,
+            "email": email,
+            "msg": "OTP resent ✅"
+        })
+
+    return redirect("register")
+
+def resend_otp(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        if not email:
+            return redirect("register")
+
+        EmailOTP.objects.filter(email=email).delete()
+
+        otp = generate_otp()
+
+        temp_user, _ = User.objects.get_or_create(username=email)
+
+        EmailOTP.objects.create(
+            user=temp_user,
+            email=email,
+            otp=otp
+        )
+
+        send_mail(
+            "Resend OTP",
+            f"Your new OTP is {otp}",
+            "supportpixelaura@gmail.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return render(request, "registration/register.html", {
+            "otp_sent": True,
+            "email": email,
+            "msg": "OTP resent ✅"
+        })
+
+    return redirect("register")

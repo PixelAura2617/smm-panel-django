@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="otp-container">
+    <h2>Verify OTP</h2>
+
+    <form method="POST" action="{% url 'verify_otp' %}">
+        {% csrf_token %}
+        
+        <input type="hidden" name="email" value="{{ email }}">
+
+        <input type="text" name="otp" placeholder="Enter OTP" required>
+
+        <button type="submit">Verify OTP</button>
+    </form>
+    <form method="POST" action="{% url 'resend_otp' %}">
+    {% csrf_token %}
+    <input type="hidden" name="email" value="{{ email }}">
+    <button type="submit">Resend OTP</button>
+</form>
+</div>
+
+<style>
+.otp-container {
+    max-width: 400px;
+    margin: 80px auto;
+    background: #1e1e2f;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+}
+
+.otp-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: none;
+}
+
+.otp-container button {
+    width: 100%;
+    padding: 12px;
+    background: #00a8ff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+}
+</style>
+
+{% endblock %}

@@ -12,7 +12,7 @@ class Service(models.Model):
 
     cost_price = models.FloatField()
     margin_percent = models.FloatField(default=30)
-    category = models.CharField(max_length=100, default="Genral")
+    category = models.CharField(max_length=100, default="General")
 
     min_qty = models.IntegerField(default=1)
     max_qty = models.IntegerField(default=1000000)
@@ -52,7 +52,6 @@ class Profile(models.Model):
         if not self.referral_code:
             code = self.generate_referral_code()
 
-            # 🔥 ensure unique
             while Profile.objects.filter(referral_code=code).exists():
                 code = self.generate_referral_code()
 
@@ -94,7 +93,7 @@ class Order(models.Model):
         return f"{self.user.username} - {self.service.name} - {self.quantity} - {self.status}"
 
 
-# 🔹 TRANSACTIONS (PAYMENT + REFERRAL)
+# 🔹 TRANSACTIONS
 class Transaction(models.Model):
     STATUS_CHOICES = (
         ('success', 'Success'),
@@ -110,21 +109,33 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - ₹{self.amount} - {self.status}"
-    
+
+
+# 🔹 WITHDRAW
 class WithdrawRequest(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     )
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.FloatField()
     upi_id = models.CharField(max_length=100)
-    
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - ₹{self.amount} - {self.status}"
-    
+
+
+# 🔹 EMAIL OTP
+class EmailOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.otp}"
