@@ -1,1 +1,1 @@
-web: gunicorn smm_panel.wsgi
+web: gunicorn smm_panel.wsgi:application

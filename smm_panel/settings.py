@@ -121,6 +121,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    ...
+]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 
@@ -145,9 +153,3 @@ EMAIL_HOST_USER = 'supportpixelaura@gmail.com'
 EMAIL_HOST_PASSWORD = 'czmh uldh tiyr xtid'
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-MIDDLEWARE = ['dajngo.middleware.security.SecurityMiddleware,'
-              'whitenoise.middleware.WhiteNoiseMiddleware', #...
-]
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
