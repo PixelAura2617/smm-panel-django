@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["smm-panel-dajngo.onrender.com"]
 
 
 # ---------------- APPS ----------------
@@ -81,6 +81,10 @@ STATICFILES_DIRS = [
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+CSRF_TRUSTED_ORIFINS = [
+    "https://smm-panel-django.onrender.com"
+]
 
 
 # ---------------- LOGIN ----------------
