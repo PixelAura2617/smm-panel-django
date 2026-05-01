@@ -609,17 +609,15 @@ def resend_otp(request):
             otp=otp
         )
 
-    try:
-         send_mail(
+    
+        send_mail(
         "Resend OTP",
         f"Your new OTP is {otp}",
         settings.DEFAULT_FROM_EMAIL,
         [email],
-        fail_silently=False,
+        fail_silently=True,
     )
-    except Exception as e:
-        print("EMAIL ERROR:", e)
-
+   
         return render(request, "registration/register.html", {
             "otp_sent": True,
             "email": email,
