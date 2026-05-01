@@ -609,13 +609,16 @@ def resend_otp(request):
             otp=otp
         )
 
-        send_mail(
-            "Resend OTP",
-            f"Your new OTP is {otp}",
-            "supportpixelaura@gmail.com",
-            [email],
-            fail_silently=False,
-        )
+    try:
+         send_mail(
+        "Resend OTP",
+        f"Your new OTP is {otp}",
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=False,
+    )
+    except Exception as e:
+        print("EMAIL ERROR:", e)
 
         return render(request, "registration/register.html", {
             "otp_sent": True,
