@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -662,3 +663,18 @@ def resend_otp(request):
         })
 
     return redirect("register")
+
+def test_mail(request):
+    try:
+        send_mail(
+            "Test",
+            "Hello from Django",
+            "supportpixelaura@gmail.com",
+            ["YOUR_EMAIL@gmail.com"],
+            fail_silently=False,
+        )
+        return HttpResponse("Email Sent ✅")
+    except Exception as e:
+        return HttpResponse(f"Error: {e}")
+
+    
