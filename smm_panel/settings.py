@@ -1,3 +1,5 @@
+import socket
+socket.settimeout(5)
 from pathlib import Path
 import os
 

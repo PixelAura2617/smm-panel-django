@@ -612,14 +612,14 @@ def resend_otp(request):
     try:
 
         send_mail(
-        "Resend OTP",
-        f"Your new OTP is {otp}",
+        "Your OTP",
+        f"Your OTP is {otp}",
         settings.DEFAULT_FROM_EMAIL,
         [email],
         fail_silently=True,
     )
     except Exception as e: 
-        print("Email failed:", e)
+        print("Email ERROR:", e)
    
         return render(request, "registration/register.html", {
             "otp_sent": True,
