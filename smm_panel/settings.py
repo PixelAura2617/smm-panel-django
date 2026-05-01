@@ -1,5 +1,5 @@
 import socket
-socket.settimeout(5)
+socket.setdefaulttimeout(5)
 from pathlib import Path
 import os
 
