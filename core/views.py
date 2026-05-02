@@ -594,6 +594,17 @@ def register(request):
 
         requests.post(url, json=data, headers=headers)
 
+    def register(request):
+        if request.method == "POST":
+            email = request.POST.get("email")
+            username = request.POST.get("username")
+            password = request.POST.get("password")
+
+            otp = "123456"  # example (tu apna OTP logic use kar)
+  
+        # send otp
+            send_otp_email(email, otp)
+
         return render(request, "registration/register.html", {
             "otp_sent": True,
             "email": email,
@@ -601,8 +612,8 @@ def register(request):
             "password": password
         })
 
-        return render(request, "registration/register.html")
-
+    # ⚠️ YE IMPORTANT HAI (GET request ke liye)
+    return render(request, "registration/register.html")
 
 # 🔹 RESEND OTP
 def resend_otp(request):
