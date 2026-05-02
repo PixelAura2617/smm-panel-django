@@ -570,14 +570,29 @@ def register(request):
             otp=otp
         )
 
-        # 📧 SEND EMAIL
-        send_mail(
-            "Your OTP Code",
-            f"Your OTP is {otp}",
-            "supportpixelaura@gmail.com",
-            [email],
-            fail_silently=False,
-        )
+       
+    def send_otp_email(email, otp):
+        url = "https://api.brevo.com/v3/smtp/email"
+
+        headers = {
+            "accept": "application/json",
+            "api-key": settings.BREVO_API_KEY,
+            "content-type": "application/json"
+        }
+
+        data = {
+            "sender": {
+            "email": "noreply@spicepetals.com",
+            "name": "SMM Panel"
+        },
+           "to": [
+            {"email": email}
+        ],
+           "subject": "Your OTP",
+           "htmlContent": f"<h3>Your OTP is: {otp}</h3>"
+        }
+
+        requests.post(url, json=data, headers=headers)
 
         return render(request, "registration/register.html", {
             "otp_sent": True,
@@ -586,7 +601,7 @@ def register(request):
             "password": password
         })
 
-    return render(request, "registration/register.html")
+        return render(request, "registration/register.html")
 
 
 # 🔹 RESEND OTP

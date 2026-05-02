@@ -103,6 +103,8 @@ RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET")
 # ---------------- SMM API ----------------
 SMM_API_KEY = os.environ.get("SMM_API_KEY")
 
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+
 
 # ---------------- EMAIL ----------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
