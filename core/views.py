@@ -591,3 +591,34 @@ def register(request):
 
     # 🔹 GET REQUEST
     return render(request, "registration/register.html")
+
+def resend_otp(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+
+        if not email:
+            return redirect("register")
+
+        # old OTP delete
+        EmailOTP.objects.filter(email=email).delete()
+
+        otp = generate_otp()
+
+        temp_user, _ = User.objects.get_or_create(username=email)
+
+        EmailOTP.objects.create(
+            user=temp_user,
+            email=email,
+            otp=otp
+        )
+
+        # 🔥 IMPORTANT (Brevo वाला function use कर)
+        send_otp_email(email, otp)
+
+        return render(request, "registration/register.html", {
+            "otp_sent": True,
+            "email": email,
+            "msg": "OTP resent ✅"
+        })
+
+    return redirect("register")
