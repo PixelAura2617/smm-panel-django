@@ -582,7 +582,7 @@ def register(request):
 
         data = {
             "sender": {
-            "email": "noreply@spicepetals.com",
+            "email": "supportpixelaura@gmail.com",
             "name": "SMM Panel"
         },
            "to": [
