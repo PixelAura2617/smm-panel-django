@@ -477,72 +477,39 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 
-# 🔹 REGISTER (EMAIL OTP SYSTEM)
-# 🔹 GENERATE OTP
-def generate_otp():
-    return str(random.randint(100000, 999999))
+# 🔹 SEND EMAIL (BREVO API)
+def send_otp_email(email, otp):
+    url = "https://api.brevo.com/v3/smtp/email"
+
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json"
+    }
+
+    data = {
+        "sender": {
+            "email": "supportpixelaura@gmail.com",
+            "name": "PixelAuraAgency"
+        },
+        "to": [{"email": email}],
+        "subject": "Your OTP Code",
+        "htmlContent": f"<h3>Your OTP is: {otp}</h3>"
+    }
+
+    response = requests.post(url, json=data, headers=headers)
+
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.text)
 
 
-# 🔹 REGISTER (EMAIL OTP SYSTEM)
+# 🔹 REGISTER
 def register(request):
-    if request.method == "POST":
 
-        # =======================
-        # 🔥 STEP 2: VERIFY OTP
-        # =======================
-        if "verify_otp" in request.POST:
-            email = request.POST.get("email")
-            otp = request.POST.get("email_otp")
-            username = request.POST.get("username")
-            password = request.POST.get("password")
-
-            otp_obj = EmailOTP.objects.filter(email=email).order_by('-created_at').first()
-
-            # ❌ OTP not found
-            if not otp_obj:
-                return render(request, "registration/register.html", {
-                    "error": "OTP not found ❌",
-                    "otp_sent": True,
-                    "email": email,
-                    "username": username,
-                    "password": password
-                })
-
-            # ⏰ OTP expired (5 min)
-            if now() > otp_obj.created_at + timedelta(minutes=5):
-                return render(request, "registration/register.html", {
-                    "error": "OTP expired ❌",
-                    "otp_sent": True,
-                    "email": email,
-                    "username": username,
-                    "password": password
-                })
-
-            # ✅ OTP match
-            if otp_obj.otp == otp:
-                EmailOTP.objects.filter(email=email).delete()
-
-                user = User.objects.create_user(
-                    username=username,
-                    password=password,
-                    email=email
-                )
-
-                return redirect("login")
-
-            # ❌ wrong OTP
-            return render(request, "registration/register.html", {
-                "error": "Invalid OTP ❌",
-                "otp_sent": True,
-                "email": email,
-                "username": username,
-                "password": password
-            })
-
-
-        # =======================
-        # 🔥 STEP 1: SEND OTP
-        # =======================
+    # =======================
+    # STEP 1: SEND OTP
+    # =======================
+    if request.method == "POST" and "send_otp" in request.POST:
         username = request.POST.get("username")
         password = request.POST.get("password")
         email = request.POST.get("email")
@@ -554,10 +521,9 @@ def register(request):
 
         if User.objects.filter(username=username).exists():
             return render(request, "registration/register.html", {
-                "error": "Username exists ❌"
+                "error": "Username already exists ❌"
             })
 
-        # 🔥 delete old OTP
         EmailOTP.objects.filter(email=email).delete()
 
         otp = generate_otp()
@@ -570,40 +536,7 @@ def register(request):
             otp=otp
         )
 
-       
-    def send_otp_email(email, otp):
-        url = "https://api.brevo.com/v3/smtp/email"
-
-        headers = {
-            "accept": "application/json",
-            "api-key": settings.BREVO_API_KEY,
-            "content-type": "application/json"
-        }
-
-        data = {
-            "sender": {
-            "email": "supportpixelaura@gmail.com",
-            "name": "SMM Panel"
-        },
-           "to": [
-            {"email": email}
-        ],
-           "subject": "Your OTP",
-           "htmlContent": f"<h3>Your OTP is: {otp}</h3>"
-        }
-
-        requests.post(url, json=data, headers=headers)
-
-    def register(request):
-        if request.method == "POST":
-            email = request.POST.get("email")
-            username = request.POST.get("username")
-            password = request.POST.get("password")
-
-            otp = "123456"  # example (tu apna OTP logic use kar)
-  
-        # send otp
-            send_otp_email(email, otp)
+        send_otp_email(email, otp)
 
         return render(request, "registration/register.html", {
             "otp_sent": True,
@@ -612,95 +545,49 @@ def register(request):
             "password": password
         })
 
-    # ⚠️ YE IMPORTANT HAI (GET request ke liye)
+
+    # =======================
+    # STEP 2: VERIFY OTP
+    # =======================
+    if request.method == "POST" and "verify_otp" in request.POST:
+        email = request.POST.get("email")
+        otp = request.POST.get("email_otp")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        otp_obj = EmailOTP.objects.filter(email=email).order_by('-created_at').first()
+
+        if not otp_obj:
+            return render(request, "registration/register.html", {
+                "error": "OTP not found ❌",
+                "otp_sent": True,
+                "email": email
+            })
+
+        if now() > otp_obj.created_at + timedelta(minutes=5):
+            return render(request, "registration/register.html", {
+                "error": "OTP expired ❌",
+                "otp_sent": True,
+                "email": email
+            })
+
+        if otp_obj.otp == otp:
+            EmailOTP.objects.filter(email=email).delete()
+
+            User.objects.create_user(
+                username=username,
+                password=password,
+                email=email
+            )
+
+            return redirect("login")
+
+        return render(request, "registration/register.html", {
+            "error": "Invalid OTP ❌",
+            "otp_sent": True,
+            "email": email
+        })
+
+
+    # 🔹 GET REQUEST
     return render(request, "registration/register.html")
-
-# 🔹 RESEND OTP
-def resend_otp(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-
-        if not email:
-            return redirect("register")
-
-        # 🔥 delete old OTP
-        EmailOTP.objects.filter(email=email).delete()
-
-        otp = generate_otp()
-
-        temp_user, _ = User.objects.get_or_create(username=email)
-
-        EmailOTP.objects.create(
-            user=temp_user,
-            email=email,
-            otp=otp
-        )
-    try:
-
-        send_mail(
-        "Your OTP",
-        f"Your OTP is {otp}",
-        settings.DEFAULT_FROM_EMAIL,
-        [email],
-        fail_silently=True,
-    )
-    except Exception as e: 
-        print("Email ERROR:", e)
-   
-        return render(request, "registration/register.html", {
-            "otp_sent": True,
-            "email": email,
-            "msg": "OTP resent ✅"
-        })
-
-    return redirect("register")
-
-def resend_otp(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-
-        if not email:
-            return redirect("register")
-
-        EmailOTP.objects.filter(email=email).delete()
-
-        otp = generate_otp()
-
-        temp_user, _ = User.objects.get_or_create(username=email)
-
-        EmailOTP.objects.create(
-            user=temp_user,
-            email=email,
-            otp=otp
-        )
-
-        send_mail(
-            "Resend OTP",
-            f"Your new OTP is {otp}",
-            settings.DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=True,
-        )
-
-        return render(request, "registration/register.html", {
-            "otp_sent": True,
-            "email": email,
-            "msg": "OTP resent ✅"
-        })
-
-    return redirect("register")
-
-def test_mail(request):
-    try:
-        send_mail(
-            "Test",
-            "Hello from Django",
-            "supportpixelaura@gmail.com",
-            ["YOUR_EMAIL@gmail.com"],
-            fail_silently=False,
-        )
-        return HttpResponse("Email Sent ✅")
-    except Exception as e:
-        return HttpResponse(f"Error: {e}")
-
-    
