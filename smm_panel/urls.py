@@ -61,6 +61,6 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
-    path("test-mail/", views.test_mail),
+    
     
 ]
